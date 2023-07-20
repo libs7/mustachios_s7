@@ -1,0 +1,11 @@
+exports_files(["common.c", "common.h"])
+
+test_suite(
+    name  = "test",
+    tests = [
+        "//test/cjson",
+        "//test/scm",
+        "//test/toml"
+    ]
+)
+

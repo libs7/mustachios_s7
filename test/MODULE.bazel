@@ -1,0 +1,5 @@
+bazel_dep(name = "mustachios_s7")
+local_path_override(
+    module_name = "mustachios_s7",
+    path = "..",
+)

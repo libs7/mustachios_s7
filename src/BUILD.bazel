@@ -1,0 +1,78 @@
+package(default_visibility = ["//visibility:public"])
+
+load("//:BUILD.bzl",
+     "BASE_SRCS", "BASE_DEPS",
+     "BASE_COPTS", "BASE_INCLUDE_PATHS",
+     "BASE_DEFINES", "BASE_LINKOPTS",
+     "LIBS7_VERSION",
+     "LIBLOG_CC_VERSION",
+     "MUSTACHIOS_S7_VERSION", "MUSTACHIOS_VERSION")
+
+SRCS = BASE_SRCS # + ["@libs7//src:s7.h"]
+DEPS = BASE_DEPS # + ["@mustachios//src:mustachios"]
+INCLUDE_PATHS = BASE_INCLUDE_PATHS + [
+    # "-Iconfig",
+    "-Iexternal/mustachios~{}/src".format(MUSTACHIOS_VERSION),
+    "-Iexternal/mustachios~{}/adapter/ds_mgr".format(MUSTACHIOS_VERSION),
+    "-Iexternal/mustachios~{}/adapter/json/cjson".format(MUSTACHIOS_VERSION),
+    "-Iexternal/mustachios~{}/adapter/scm/s7".format(MUSTACHIOS_VERSION),
+    "-Iexternal/mustachios~{}/adapter/toml".format(MUSTACHIOS_VERSION),
+]
+COPTS = BASE_COPTS + INCLUDE_PATHS
+DEFINES       = BASE_DEFINES
+LINKOPTS      = BASE_LINKOPTS
+
+# MUSTACHE_INCLUDE_PATHS = [
+#     "-Ilib/libmustachios/mustach",
+#     "-Iexternal/libs7/lib/libmustachios/mustach",
+#     "-Ilib/libmustachios/mustach/ds_mgr",
+#     "-Iexternal/libs7/lib/libmustachios/mustach/ds_mgr"
+# ]
+
+# MUSTACHE_DEPS = [
+#     "//lib/libmustachios/mustach",
+#     "//lib/libmustachios/mustach/ds_mgr:mustach_ds_mgr",
+# ]
+
+################################################################
+cc_library(
+    name = "mustachios_s7",
+    linkstatic = True,
+    alwayslink = True, # ensure init fn sym available for dlsym
+    srcs = SRCS + [
+        "libmustachios_s7.c",
+        # "libmustachios_s7.h",
+    ],
+    hdrs = ["libmustachios_s7.h"],
+    copts = COPTS,
+    deps = DEPS + [
+        # "//src:s7",
+
+        # mustachios APIs (mustache:render):
+        "@mustachios//src:mustach",
+        "@mustachios//adapter/ds_mgr",
+        "@mustachios//adapter/json/cjson:mustache_json",
+        "@mustachios//adapter/scm/s7:mustache_scm",
+        "@mustachios//adapter/toml:mustache_toml",
+
+        ## s7 data plugins:
+        "@cjson_s7//src:cjson_s7",
+        "@toml_s7//src:toml_s7",
+        "@sexp_s7//src:sexp_s7",
+    ],
+    local_defines = DEFINES,
+    linkopts = LINKOPTS
+)
+
+cc_shared_library(
+    name  = "mustachios_s7_dso",
+    shared_lib_name = select({
+        "@platforms//os:macos": "libmustachios_s7.dylib",
+        "@platforms//os:linux": "libmustachios_s7.so",
+        # "@platforms//os:windows": "libmustachios_s7.dll",
+        "//conditions:default": "libmustachios_s7.so"
+    }),
+    deps = [":mustachios_s7"]
+)
+
+
