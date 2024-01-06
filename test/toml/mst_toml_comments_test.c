@@ -1,5 +1,4 @@
 #include "unity.h"
-#include "config.h"
 #include "common.h"
 #include "macros.h"
 
@@ -129,9 +128,9 @@ int main(int argc, char **argv)
 {
     s7 = initialize("mst_toml_comments_test", argc, argv);
 
-    libs7_load_clib(s7, "mustachios");
-    libs7_load_clib(s7, "toml");
-    libs7_load_clib(s7, "cjson");
+    libs7_load_plugin(s7, "mustachios");
+    libs7_load_plugin(s7, "toml");
+    libs7_load_plugin(s7, "cjson");
 
     toml_read = s7_name_to_value(s7, "toml:read");
 

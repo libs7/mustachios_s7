@@ -6,7 +6,7 @@
 #include <sys/types.h>
 
 #include "gopt.h"
-#include "log.h"
+#include "liblogc.h"
 #include "unity.h"
 #include "utarray.h"
 #include "utstring.h"
@@ -128,8 +128,8 @@ void print_debug_env(void)
     struct passwd* pwd = getpwuid(getuid());
     log_debug("pwd->pw_dir: %s", pwd->pw_dir);
 
-    // BAZEL_CURRENT_REPOSITORY: null when run from 'home' repo, 'libs7' when run as external repo
-    log_debug("BAZEL_CURRENT_REPOSITORY (macro): '%s'", BAZEL_CURRENT_REPOSITORY);
+    // LOCAL_REPO: null when run from 'home' repo, 'libs7' when run as external repo
+    /* log_debug("LOCAL_REPO (macro): '%s'", LOCAL_REPO); */
 
     // TEST_WORKSPACE: always the root ws
     log_debug("TEST_WORKSPACE: '%s'", getenv("TEST_WORKSPACE"));

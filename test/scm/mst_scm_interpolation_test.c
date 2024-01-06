@@ -1,5 +1,4 @@
 #include "unity.h"
-#include "config.h"
 #include "macros.h"
 #include "common.h"
 #include "libs7.h"
@@ -336,9 +335,9 @@ int main(int argc, char **argv)
 {
     s7 = initialize("mst_scm_interpolation_test", argc, argv);
 
-    libs7_load_clib(s7, "mustachios");
-    libs7_load_clib(s7, "cjson");
-    libs7_load_clib(s7, "toml");
+    libs7_load_plugin(s7, "mustachios");
+    libs7_load_plugin(s7, "cjson");
+    libs7_load_plugin(s7, "toml");
 
     mustache_render = s7_name_to_value(s7, "mustache:render");
 

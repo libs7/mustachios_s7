@@ -4,10 +4,7 @@ load("//:BUILD.bzl",
      "BASE_SRCS", "BASE_DEPS",
      "BASE_COPTS", "BASE_INCLUDE_PATHS",
      "BASE_DEFINES", "BASE_LINKOPTS",
-     "TIMEOUT",
-     "GOPT_VERSION",
-     "UNITY_VERSION",
-     "UTHASH_VERSION")
+     "TIMEOUT")
 
 SRCS          = BASE_SRCS + [
     "//test:common.c", "//test:common.h",
@@ -19,11 +16,11 @@ SRCS          = BASE_SRCS + [
 })
 
 DEPS          = BASE_DEPS + [
-    "//src:mustachios_s7",
-    "@sexp_s7//src:sexp_s7",
-    "@gopt//:gopt",
-    "@unity//src:unity",
-    "@uthash//src:uthash"
+    "//lib:mustachios_s7",
+    "@dune_s7//lib:dune_s7",
+    "@gopt//lib:gopt",
+    "@unity//lib:unity",
+    "@uthash//lib:uthash"
 ] + select({
     # "//config/clibs/link:archive?": [
     #     "//lib/libmustachios:mustachios_s7_archive",
@@ -32,11 +29,11 @@ DEPS          = BASE_DEPS + [
 })
 
 INCLUDE_PATHS = BASE_INCLUDE_PATHS + [
-    "-Isrc",
+    # "-Isrc",
     "-Itest",
-    "-Iexternal/gopt~{}/src".format(GOPT_VERSION),
-    "-Iexternal/unity~{}/src".format(UNITY_VERSION),
-    "-Iexternal/uthash~{}/src".format(UTHASH_VERSION),
+    # "-Iexternal/gopt~{}/lib".format(GOPT_VERSION),
+    # "-Iexternal/unity~{}/lib".format(UNITY_VERSION),
+    # "-Iexternal/uthash~{}/lib".format(UTHASH_VERSION),
 ]
 
 COPTS         = BASE_COPTS + INCLUDE_PATHS

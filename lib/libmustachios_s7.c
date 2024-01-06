@@ -5,13 +5,28 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "config.h"
+/* #include "config.h" */
 /* #include "cJSON.h" */
-#include "s7.h"
-#include "libmustachios_s7.h"
+#include "liblogc.h"
+#include "libs7.h"
+
+#include "mustach_ds_mgr.h"
 #include "mustache_s7.h"
 #include "mustache_cjson.h"
 #include "mustache_tomlc99.h"
+
+#include "libmustachios_s7_internal.h"
+
+#if defined(PROFILE_fastbuild)
+#define DEBUG_LEVEL mustachios_s7_debug
+int  DEBUG_LEVEL;
+#define TRACE_FLAG mustachios_s7_trace
+bool TRACE_FLAG;
+
+#define S7_DEBUG_LEVEL libs7_debug
+extern int  libs7_debug;
+
+#endif
 
 /* #define CRITICAL(str) \ */
 /* 	{print_stacktrace(0); \ */
@@ -33,7 +48,8 @@
    the s7 var. The stack gets passed from the initial routine down to
    the kernel and then back up.
 */
-s7_scheme *s7;
+#if INTERFACE
+extern s7_scheme *s7;
 
 /* ****************************************************************
  * API
@@ -59,11 +75,12 @@ struct sink_flags_s {
         uint8_t data;
     };
 };
+#endif
 
 FILE *ostream;
 const char *port_filename;
 
-void _handle_sink_flags(s7_scheme *s7,
+LOCAL void _handle_sink_flags(s7_scheme *s7,
                         struct sink_flags_s *sink_flags,
                         s7_pointer sink)
 {
@@ -92,7 +109,7 @@ void _handle_sink_flags(s7_scheme *s7,
         s7_pointer pfn = s7_apply_function(s7,
                                            s7_name_to_value(s7, "port-filename"),
                                           s7_list(s7, 1, sink));
-        TRACE_S7_DUMP("port-filename", pfn);
+        TRACE_S7_DUMP(0, "port-filename", pfn);
         if (s7_string_length(pfn) == 0) {
             sink_flags->to_string_port = 1;
         } else {
@@ -114,8 +131,8 @@ void _handle_sink_flags(s7_scheme *s7,
  */
 s7_pointer g_mustachios_render(s7_scheme *s7, s7_pointer args)
 {
-    TRACE_ENTRY(g_mustachios_render);
-    TRACE_S7_DUMP("args", args);
+    TRACE_ENTRY;
+    TRACE_S7_DUMP(0, "args", args);
 
     /* args: sink, template, data, flags */
 
@@ -145,7 +162,7 @@ s7_pointer g_mustachios_render(s7_scheme *s7, s7_pointer args)
     //**** arg 1: TEMPLATE ****************
     s7_pointer template = s7_cadr(args);
     const char *template_str;
-    TRACE_S7_DUMP("t", template);
+    TRACE_S7_DUMP(0, "t", template);
 
     if (s7_is_string(template)) {
         template_str = s7_string(template);
@@ -160,7 +177,7 @@ s7_pointer g_mustachios_render(s7_scheme *s7, s7_pointer args)
 
     //**** arg 2: DATA ****************
     s7_pointer data     = s7_caddr(args);
-    TRACE_S7_DUMP("data", data);
+    TRACE_S7_DUMP(0, "data", data);
 
     //**** arg 3: FLAGS ****************
     // flags are opt-out?
@@ -177,21 +194,21 @@ s7_pointer g_mustachios_render(s7_scheme *s7, s7_pointer args)
 
     //FIXME: user-passed flags should REPLACE the default
 
-    TRACE_LOG_DEBUG("RENDERING", "");
+    LOG_DEBUG(0, "RENDERING", "");
     /* ******************** render ******************** */
     s7_pointer b;
     s7_pointer json_is_datum_fn = s7_name_to_value(s7, "json:datum?");
     if (json_is_datum_fn == s7_undefined(s7)) {
-        log_error("var json:datum? is undefined; did you forget to initialize libjson? Try 'libs7_load_clib(s7, \"json\");'");
+        log_error("var json:datum? is undefined; did you forget to initialize libjson? Try 'libs7_load_plugin(s7, \"json\");'");
         s7_error(s7, s7_make_symbol(s7, "undefined symbol"),
                  s7_list(s7, 1, s7_make_string(s7,
-                                               "var json:datum? is undefined; did you forget to initialize libjson? Try 'libs7_load_clib(s7, \"json\");'")));
+                                               "var json:datum? is undefined; did you forget to initialize libjson? Try 'libs7_load_plugin(s7, \"json\");'")));
     }
 
     b = s7_apply_function(s7, json_is_datum_fn, s7_list(s7, 1, data));
     /* log_debug("jjjjjjjjjjjjjjjj"); */
     if (b == s7_t(s7)) {
-        TRACE_LOG_DEBUG("RENDER JSON", "");
+        LOG_DEBUG(0, "RENDER JSON", "");
         cJSON *root = (cJSON*)s7_c_object_value(data);
         if (sink_flags.to_file_port) {
             /* log_debug("SINK: file port"); */
@@ -226,16 +243,16 @@ s7_pointer g_mustachios_render(s7_scheme *s7, s7_pointer args)
         /* log_debug("tttttttttttttttt"); */
         s7_pointer toml_is_map_fn = s7_name_to_value(s7, "toml:map?");
         if (toml_is_map_fn == s7_undefined(s7)) {
-            log_error("var toml:map? is undefined; did you forget to initialize libtoml? Try 'libs7_load_clib(s7, \"toml\");'");
+            log_error("var toml:map? is undefined; did you forget to initialize libtoml? Try 'libs7_load_plugin(s7, \"toml\");'");
             s7_error(s7, s7_make_symbol(s7, "undefined symbol"),
                      s7_list(s7, 1, s7_make_string(s7,
-                                                   "var toml:map? is undefined; did you forget to initialize libtoml? Try 'libs7_load_clib(s7, \"toml\");'")));
+                                                   "var toml:map? is undefined; did you forget to initialize libtoml? Try 'libs7_load_plugin(s7, \"toml\");'")));
         }
         b = s7_apply_function(s7, toml_is_map_fn,
                               s7_list(s7, 1, data));
         /* log_debug("????tttttttttttttttt"); */
         if (b == s7_t(s7)) {
-            TRACE_LOG_DEBUG("TOML RENDER", "");
+            LOG_DEBUG(0, "TOML RENDER", "");
             toml_table_t *root = (toml_table_t*)s7_c_object_value(data);
             if (sink_flags.to_file_port) {
                 /* log_debug("SINK: file port"); */
@@ -267,7 +284,7 @@ s7_pointer g_mustachios_render(s7_scheme *s7, s7_pointer args)
                 log_error("Bad SINK?");
             }
         } else {
-            TRACE_LOG_DEBUG("RENDER SCM", "");
+            LOG_DEBUG(0, "RENDER SCM", "");
             // must be scheme? alist, hash-table, or '()
             // but it could also be a list, vector, string, int, etc.
 
@@ -276,33 +293,33 @@ s7_pointer g_mustachios_render(s7_scheme *s7, s7_pointer args)
             /*                       s7_list(s7, 1, data)); */
             /* if (b == s7_t(s7)) { */
                 if (sink_flags.to_file_port) {
-                    TRACE_LOG_DEBUG("SINK: file port", "");
+                    LOG_DEBUG(0, "SINK: file port", "");
                     mustache_scm_frender(ostream, template_str, 0, data, flags);
                 }
                 else if (sink_flags.to_string) {
                     if (sink_flags.to_current_output_port) {
-                        TRACE_LOG_DEBUG("SINK: #t", "");
+                        LOG_DEBUG(0, "SINK: #t", "");
                     } else {
-                        TRACE_LOG_DEBUG("SINK: #f", "");
+                        LOG_DEBUG(0, "SINK: #f", "");
                     }
                     const char * s = mustache_scm_render(template_str, 0, data, flags);
                     s7_pointer str7 = s7_make_string(s7, s);
                     if (sink_flags.to_current_output_port) {
-                        TRACE_LOG_DEBUG("SINK: #t", "");
+                        LOG_DEBUG(0, "SINK: #t", "");
                         s7_display(s7, str7, s7_current_output_port(s7));
                     } else {
-                        TRACE_LOG_DEBUG("SINK: #f", "");
+                        LOG_DEBUG(0, "SINK: #f", "");
                     }
                     return str7;
                 }
                 else if (sink_flags.to_current_output_port) {
-                    TRACE_LOG_DEBUG("SINK: '()", "");
+                    LOG_DEBUG(0, "SINK: '()", "");
                     const char * s = mustache_scm_render(template_str, 0, data, flags);
                     s7_display(s7, s7_make_string(s7, s),
                                s7_current_output_port(s7));
                 }
                 else if (sink_flags.to_string_port) {
-                    TRACE_LOG_DEBUG("SINK: string port", "");
+                    LOG_DEBUG(0, "SINK: string port", "");
                     const char * s = mustache_scm_render(template_str, 0, data, flags);
                     s7_display(s7, s7_make_string(s7, s), sink);
                 }
@@ -380,10 +397,10 @@ s7_pointer g_mustachios_render(s7_scheme *s7, s7_pointer args)
 
 }
 
-s7_pointer libmustachios_s7_init(s7_scheme *_s7)
+EXPORT s7_pointer libmustachios_s7_init(s7_scheme *_s7)
 {
-    TRACE_ENTRY(libmustachios_s7_init);
-    TRACE_LOG_DEBUG("libmustachios_s7_init", "");
+    TRACE_ENTRY;
+    LOG_DEBUG(0, "libmustachios_s7_init", "");
 
     s7 = _s7;
     s7_pointer curr_env;

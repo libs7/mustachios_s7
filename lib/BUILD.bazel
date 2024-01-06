@@ -1,0 +1,124 @@
+package(default_visibility = ["//visibility:public"])
+load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
+load("@libs7//plugin:MACROS.bzl", "s7_plugin", "s7_library")
+
+load("//:BUILD.bzl",
+     "BASE_SRCS", "BASE_DEPS",
+     "BASE_COPTS", "BASE_INCLUDE_PATHS",
+     "BASE_DEFINES", "BASE_LINKOPTS")
+     # "LIBS7_VERSION",
+     # "LIBLOGC_VERSION",
+     # "MUSTACHIOS_S7_VERSION", "MUSTACHIOS_VERSION")
+
+SRCS = BASE_SRCS # + ["@libs7//lib:s7.h"]
+DEPS = BASE_DEPS # + ["@mustachios//lib:mustachios"]
+INCLUDE_PATHS = BASE_INCLUDE_PATHS + [
+    # "-Iconfig",
+    # "-Iexternal/mustachios~{}/src".format(MUSTACHIOS_VERSION),
+    # "-Iexternal/mustachios~{}/adapter/ds_mgr".format(MUSTACHIOS_VERSION),
+    # "-Iexternal/mustachios~{}/adapter/json/cjson".format(MUSTACHIOS_VERSION),
+    # "-Iexternal/mustachios~{}/adapter/scm/s7".format(MUSTACHIOS_VERSION),
+    # "-Iexternal/mustachios~{}/adapter/toml".format(MUSTACHIOS_VERSION),
+]
+COPTS = BASE_COPTS + INCLUDE_PATHS
+DEFINES       = BASE_DEFINES
+LINKOPTS      = BASE_LINKOPTS
+
+# MUSTACHE_INCLUDE_PATHS = [
+#     "-Ilib/libmustachios/mustach",
+#     "-Iexternal/libs7/lib/libmustachios/mustach",
+#     "-Ilib/libmustachios/mustach/ds_mgr",
+#     "-Iexternal/libs7/lib/libmustachios/mustach/ds_mgr"
+# ]
+
+# MUSTACHE_DEPS = [
+#     "//lib/libmustachios/mustach",
+#     "//lib/libmustachios/mustach/ds_mgr:mustach_ds_mgr",
+# ]
+
+################################################################
+# cc_library(
+s7_plugin(
+    name = "mustachios_s7",
+    linkstatic = True,
+    alwayslink = True, # ensure init fn sym available for dlsym
+    srcs = SRCS + [
+        "libmustachios_s7.c",
+        ":mkhdrs"
+    ],
+    hdrs = ["mustachios_s7.h"],
+    includes = ["."],
+    copts = COPTS,
+    deps = DEPS + [
+        # "//src:s7",
+
+        # mustachios APIs (mustache:render):
+        "@mustachios//lib:mustach",
+        "@mustachios//adapter/ds_mgr",
+        "@mustachios//adapter/json/cjson:mustache_json",
+        "@mustachios//adapter/scm/s7:mustache_scm",
+        "@mustachios//adapter/toml:mustache_toml",
+
+    ],
+    implementation_deps = [
+        ## s7 data plugins:
+        "@cjson_s7//lib:cjson_s7",
+        "@toml_s7//lib:toml_s7",
+        "@dune_s7//lib:dune_s7",
+    ],
+    local_defines = DEFINES,
+    linkopts = LINKOPTS
+)
+
+cc_shared_library(
+    name  = "mustachios_s7_dso",
+    shared_lib_name = select({
+        "@platforms//os:macos": "libmustachios_s7.dylib",
+        "@platforms//os:linux": "libmustachios_s7.so",
+        # "@platforms//os:windows": "libmustachios_s7.dll",
+        "//conditions:default": "libmustachios_s7.so"
+    }),
+    deps = [":mustachios_s7"]
+)
+
+################################################################
+makeheaders(
+    name = "mkhdrs",
+    hdrs_renamed = {
+        "libmustachios_s7.c": "libmustachios_s7_internal.h",
+    },
+    hdrs_srcs = [],
+    additional_srcs = [
+        "@makeheaders//logging:ansi_colors.h"
+    ] + select({
+        "@makeheaders//compilation_mode:fastbuild": [
+            "@libs7//logging:s7_macros_debug.h",
+            "@makeheaders//logging:macros_debug.h"
+        ],
+        "//conditions:default": [
+            "@libs7//logging:s7_macros_ndebug.h",
+            "@makeheaders//logging:macros_ndebug.h"
+        ]
+    }),
+)
+
+makeheaders(
+    name = "export_hdr",
+    out  = "mustachios_s7.h",
+    export_interface = True,
+    hdrs_srcs = [
+        "libmustachios_s7.c",
+    ],
+    additional_srcs = [
+        "@makeheaders//logging:ansi_colors.h"
+    ] + select({
+        "@makeheaders//compilation_mode:fastbuild": [
+            "@libs7//logging:s7_macros_debug.h",
+            "@makeheaders//logging:macros_debug.h"
+        ],
+        "//conditions:default": [
+            "@libs7//logging:s7_macros_ndebug.h",
+            "@makeheaders//logging:macros_ndebug.h"
+        ]
+    }),
+)

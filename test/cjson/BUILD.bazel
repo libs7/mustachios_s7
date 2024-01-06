@@ -4,10 +4,7 @@ load("//:BUILD.bzl",
      "BASE_SRCS", "BASE_DEPS",
      "BASE_COPTS", "BASE_INCLUDE_PATHS",
      "BASE_DEFINES", "BASE_LINKOPTS",
-     "TIMEOUT",
-     "GOPT_VERSION",
-     "UNITY_VERSION",
-     "UTHASH_VERSION")
+     "TIMEOUT")
 
 # load("//test:BUILD.bzl",
 #      "TEST_SRCS", "TEST_DEPS", "TEST_INCLUDE_PATHS",
@@ -24,11 +21,11 @@ SRCS = BASE_SRCS + [
 })
 
 DEPS = BASE_DEPS + [
-    "//src:mustachios_s7",
-    "@cjson_s7//src:cjson_s7",
-    "@gopt//:gopt",
-    "@unity//src:unity",
-    "@uthash//src:uthash"
+    "//lib:mustachios_s7",
+    "@cjson_s7//lib:cjson_s7",
+    "@gopt//lib:gopt",
+    "@unity//lib:unity",
+    "@uthash//lib:uthash"
 ] + select({
     # "//config/clibs/link:archive?": [
     #     "//lib/libmustachios:mustachios_s7_archive",
@@ -41,10 +38,10 @@ INCLUDE_PATHS = BASE_INCLUDE_PATHS + [
     "-Iconfig",
     "-Itest",
 
-    "-Iexternal/gopt~{}/src".format(GOPT_VERSION),
-    "-Iexternal/unity~{}/src".format(UNITY_VERSION),
-    "-Iexternal/uthash~{}/src".format(UTHASH_VERSION),
-    # "-Iexternal/liblog_cc~{}/src".format(LIBLOG_CC_VERSION),
+    # "-Iexternal/gopt~{}/lib".format(GOPT_VERSION),
+    # "-Iexternal/unity~{}/lib".format(UNITY_VERSION),
+    # "-Iexternal/uthash~{}/lib".format(UTHASH_VERSION),
+    # "-Iexternal/liblogc~{}/lib".format(LIBLOGC_VERSION),
 
     # "-Itest/unit",
     # "-Itest/libmustachios",
@@ -171,7 +168,7 @@ cc_test(
     srcs = ["cjson_test.c"],
     local_defines = DEFINES,
     deps = [
-        "//src:s7",
+        "//lib:s7",
         "//lib/libmustachios:mustachios7_s7",
         "//vendored/gopt",
         "//vendored/logc",
@@ -192,9 +189,9 @@ cc_test(
     name = "cjson_link_runtime",
     # linkstatic = True,
     srcs = ["cjson_test.c",
-            "//src:libs7.h", "//src:s7.h",
+            "//lib:libs7.h", "//lib:s7.h",
             "//lib/libmustachios:mustachios7_s7",
-            "//src:s7"
+            "//lib:s7"
             ],
     local_defines = DEFINES + ["CLIBS_LINK_RUNTIME"],
     deps = DEPS,

@@ -1,10 +1,9 @@
 #include <unistd.h>
 
 #include "unity.h"
-#include "config.h"
 #include "macros.h"
 #include "common.h"
-
+#include "liblogc.h"
 #include "libs7.h"
 
 s7_scheme *s7;
@@ -110,7 +109,7 @@ void render_to_file_port(void)
                                         s7_make_integer(s7, 1000),
                                         ifp));
     s7_close_input_port(s7, ifp);
-    TRACE_S7_DUMP("actual", actual);
+    /* TRACE_S7_DUMP("actual", actual); */
     TEST_ASSERT_EQUAL_STRING("Hello, world!", s7_string(actual));
 }
 
@@ -191,9 +190,9 @@ int main(int argc, char **argv)
 {
     s7 = initialize("mst_scm_renderers_test", argc, argv);
 
-    libs7_load_clib(s7, "mustachios");
-    libs7_load_clib(s7, "toml");
-    libs7_load_clib(s7, "cjson");
+    libs7_load_plugin(s7, "mustachios");
+    libs7_load_plugin(s7, "toml");
+    libs7_load_plugin(s7, "cjson");
 
     mustache_render = s7_name_to_value(s7, "mustache:render");
 
