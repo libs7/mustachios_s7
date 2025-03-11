@@ -28,6 +28,12 @@ bazel_dep(name = "libs7",           version = "3.0.0")
 git_override(module_name = "libs7",
              branch  = "3.0.0.dev",
              remote = "https://github.com/libs7/libs7.git")
+# libs7 dep:
+bazel_dep(name = "runfiles",       version = "3.0.0")
+git_override(module_name = "runfiles",
+             branch  = "3.0.0.dev",
+             remote = "https://github.com/obazl/runfiles.git")
+
 bazel_dep(name = "cjson_s7",        version = "1.7.18")
 git_override(module_name = "cjson_s7",
              branch  = "1.7.18.dev",
