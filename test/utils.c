@@ -28,7 +28,7 @@ s7_pointer read_data_string(s7_scheme *s7, char *data_string)
     }
     gc_loc = s7_gc_protect(s7, port);
     data   = s7_read(s7, port);
-    TRACE_S7_DUMP("data", data);
+    LOG_S7_DEBUG("data", data);
     /* if (s7_is_hash_table(data)) { */
         data = s7_eval(s7, data, s7_rootlet(s7));
     /* } */

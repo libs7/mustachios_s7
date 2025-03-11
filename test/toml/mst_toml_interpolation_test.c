@@ -278,7 +278,7 @@ int main(int argc, char **argv)
     libs7_load_plugin(s7, "cjson");
 
     toml_read = s7_name_to_value(s7, "toml:read");
-    /* TRACE_S7_DUMP("toml_read", toml_read); */
+    /* LOG_S7_DEBUG("toml_read", toml_read); */
 
     mustache_render = s7_name_to_value(s7, "mustache:render");
 

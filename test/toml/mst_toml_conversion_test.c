@@ -39,7 +39,7 @@ void to_hash_table(void) {
 
     ht = APPLY_1("toml:map->hash-table", tt);
     flag = APPLY_1("hash-table?", ht);
-    /* TRACE_S7_DUMP(0, "ht: %s", ht); */
+    /* LOG_S7_DEBUG(0, "ht: %s", ht); */
     TEST_ASSERT_TRUE(s7_boolean(s7, flag));
 
     flag = APPLY_1("toml:map?", ht);

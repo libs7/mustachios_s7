@@ -1,6 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
-load("//:BUILD.bzl",
+load("//config/cc:CONFIG.bzl",
      "BASE_SRCS", "BASE_DEPS",
      "BASE_COPTS", "BASE_INCLUDE_PATHS",
      "BASE_DEFINES", "BASE_LINKOPTS",
@@ -28,14 +28,7 @@ DEPS          = BASE_DEPS + [
     "//conditions:default": []
 })
 
-INCLUDE_PATHS = BASE_INCLUDE_PATHS + [
-    # "-Isrc",
-    "-Itest",
-    # "-Iexternal/gopt~{}/lib".format(GOPT_VERSION),
-    # "-Iexternal/unity~{}/lib".format(UNITY_VERSION),
-    # "-Iexternal/uthash~{}/lib".format(UTHASH_VERSION),
-]
-
+INCLUDE_PATHS = BASE_INCLUDE_PATHS + ["-Itest"]
 COPTS         = BASE_COPTS + INCLUDE_PATHS
 
 DATA = select({

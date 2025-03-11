@@ -1,43 +1,22 @@
 package(default_visibility = ["//visibility:public"])
+
+load("@rules_cc//cc:defs.bzl", "cc_shared_library")
 load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
 load("@libs7//plugin:MACROS.bzl", "s7_plugin", "s7_library")
 
-load("//:BUILD.bzl",
+load("//config/cc:CONFIG.bzl",
      "BASE_SRCS", "BASE_DEPS",
      "BASE_COPTS", "BASE_INCLUDE_PATHS",
      "BASE_DEFINES", "BASE_LINKOPTS")
-     # "LIBS7_VERSION",
-     # "LIBLOGC_VERSION",
-     # "MUSTACHIOS_S7_VERSION", "MUSTACHIOS_VERSION")
 
-SRCS = BASE_SRCS # + ["@libs7//lib:s7.h"]
-DEPS = BASE_DEPS # + ["@mustachios//lib:mustachios"]
-INCLUDE_PATHS = BASE_INCLUDE_PATHS + [
-    # "-Iconfig",
-    # "-Iexternal/mustachios~{}/src".format(MUSTACHIOS_VERSION),
-    # "-Iexternal/mustachios~{}/adapter/ds_mgr".format(MUSTACHIOS_VERSION),
-    # "-Iexternal/mustachios~{}/adapter/json/cjson".format(MUSTACHIOS_VERSION),
-    # "-Iexternal/mustachios~{}/adapter/scm/s7".format(MUSTACHIOS_VERSION),
-    # "-Iexternal/mustachios~{}/adapter/toml".format(MUSTACHIOS_VERSION),
-]
+SRCS = BASE_SRCS
+DEPS = BASE_DEPS
+INCLUDE_PATHS = BASE_INCLUDE_PATHS
 COPTS = BASE_COPTS + INCLUDE_PATHS
 DEFINES       = BASE_DEFINES
 LINKOPTS      = BASE_LINKOPTS
 
-# MUSTACHE_INCLUDE_PATHS = [
-#     "-Ilib/libmustachios/mustach",
-#     "-Iexternal/libs7/lib/libmustachios/mustach",
-#     "-Ilib/libmustachios/mustach/ds_mgr",
-#     "-Iexternal/libs7/lib/libmustachios/mustach/ds_mgr"
-# ]
-
-# MUSTACHE_DEPS = [
-#     "//lib/libmustachios/mustach",
-#     "//lib/libmustachios/mustach/ds_mgr:mustach_ds_mgr",
-# ]
-
 ################################################################
-# cc_library(
 s7_plugin(
     name = "mustachios_s7",
     linkstatic = True,
@@ -50,13 +29,11 @@ s7_plugin(
     includes = ["."],
     copts = COPTS,
     deps = DEPS + [
-        # "//src:s7",
-
         # mustachios APIs (mustache:render):
         "@mustachios//lib:mustach",
         "@mustachios//adapter/ds_mgr",
         "@mustachios//adapter/json/cjson:mustache_json",
-        "@mustachios//adapter/scm/s7:mustache_scm",
+        "@mustachios//adapter/scm/s7:mustache_s7",
         "@mustachios//adapter/toml:mustache_toml",
 
     ],
@@ -89,15 +66,15 @@ makeheaders(
     },
     hdrs_srcs = [],
     additional_srcs = [
-        "@makeheaders//logging:ansi_colors.h"
+        "@liblogc//macros:ansi_colors.h"
     ] + select({
-        "@makeheaders//compilation_mode:fastbuild": [
-            "@libs7//logging:s7_macros_debug.h",
-            "@makeheaders//logging:macros_debug.h"
+        "@obazl_tools_cc//profile:dev?": [
+            "@libs7//macros:s7_logging_debug.h",
+            "@liblogc//macros:logging_debug.h"
         ],
         "//conditions:default": [
-            "@libs7//logging:s7_macros_ndebug.h",
-            "@makeheaders//logging:macros_ndebug.h"
+            "@libs7//macros:s7_logging_ndebug.h",
+            "@liblogc//macros:logging_ndebug.h"
         ]
     }),
 )
@@ -110,15 +87,15 @@ makeheaders(
         "libmustachios_s7.c",
     ],
     additional_srcs = [
-        "@makeheaders//logging:ansi_colors.h"
+        "@liblogc//macros:ansi_colors.h"
     ] + select({
-        "@makeheaders//compilation_mode:fastbuild": [
-            "@libs7//logging:s7_macros_debug.h",
-            "@makeheaders//logging:macros_debug.h"
+        "@obazl_tools_cc//compilation_mode:fastbuild?": [
+            "@libs7//macros:s7_logging_debug.h",
+            "@liblogc//macros:logging_debug.h"
         ],
         "//conditions:default": [
-            "@libs7//logging:s7_macros_ndebug.h",
-            "@makeheaders//logging:macros_ndebug.h"
+            "@libs7//macros:s7_logging_ndebug.h",
+            "@liblogc//macros:logging_ndebug.h"
         ]
     }),
 )

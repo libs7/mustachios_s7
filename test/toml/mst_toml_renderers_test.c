@@ -111,7 +111,7 @@ void render_to_file_port(void)
                                         s7_make_integer(s7, 1000),
                                         ifp));
     s7_close_input_port(s7, ifp);
-    /* TRACE_S7_DUMP("actual", actual); */
+    /* LOG_S7_DEBUG("actual", actual); */
     TEST_ASSERT_EQUAL_STRING("Hello, world!", s7_string(actual));
 }
 

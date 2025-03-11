@@ -1,6 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
-load("//:BUILD.bzl",
+load("//config/cc:CONFIG.bzl",
      "BASE_SRCS", "BASE_DEPS",
      "BASE_COPTS", "BASE_INCLUDE_PATHS",
      "BASE_DEFINES", "BASE_LINKOPTS",
@@ -29,11 +29,7 @@ DEPS          = BASE_DEPS + [
 })
 
 INCLUDE_PATHS = BASE_INCLUDE_PATHS + [
-    # "-Isrc",
     "-Itest",
-    # "-Iexternal/gopt~{}/lib".format(GOPT_VERSION),
-    # "-Iexternal/unity~{}/lib".format(UNITY_VERSION),
-    # "-Iexternal/uthash~{}/lib".format(UTHASH_VERSION),
 ]
 
 COPTS         = BASE_COPTS + INCLUDE_PATHS
@@ -49,35 +45,7 @@ DEFINES       = BASE_DEFINES
 LINKOPTS      = BASE_LINKOPTS
 
 
-# load("//:BUILD.bzl",
-#      "BASE_SRCS", "BASE_DEPS", "BASE_INCLUDE_PATHS",
-#      "BASE_COPTS", "BASE_DEFINES", "BASE_LINKOPTS")
-
-# load("//test:BUILD.bzl",
-#      "TEST_SRCS", "TEST_DEPS", "TEST_INCLUDE_PATHS",
-#      "TEST_COPTS", "TEST_DEFINES", "TEST_LINKOPTS",
-#      "TIMEOUT")
-
-# SRCS          = BASE_SRCS + TEST_SRCS + ["macros.h"]
-
-# INCLUDE_PATHS = BASE_INCLUDE_PATHS + TEST_INCLUDE_PATHS + [
-#     # "-Ilib/libmustachios/scm/s7"
-# ]
-# COPTS         = BASE_COPTS + TEST_COPTS + INCLUDE_PATHS
-# DEPS          = BASE_DEPS + TEST_DEPS + [
-#     # "//lib/libmustachios/scm/s7:mustache_scm"
-# ] + select({
-#     "//config/clibs/link:archive?": [
-#         "//lib/libmustachios:mustachios_s7_archive",
-#     ],
-#     "//conditions:default": []
-# })
-
-# DEFINES       = BASE_DEFINES + TEST_DEFINES
-# LINKOPTS      = BASE_LINKOPTS + TEST_LINKOPTS
-
 TAGS = ["mustache", "scm"]
- # + COPTS_TEST + COPTS_S7,
 ################################################################
 test_suite(
     name  = "scm",

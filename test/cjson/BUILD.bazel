@@ -1,6 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
-load("//:BUILD.bzl",
+load("//config/cc:CONFIG.bzl",
      "BASE_SRCS", "BASE_DEPS",
      "BASE_COPTS", "BASE_INCLUDE_PATHS",
      "BASE_DEFINES", "BASE_LINKOPTS",
@@ -37,17 +37,6 @@ INCLUDE_PATHS = BASE_INCLUDE_PATHS + [
     "-Isrc",
     "-Iconfig",
     "-Itest",
-
-    # "-Iexternal/gopt~{}/lib".format(GOPT_VERSION),
-    # "-Iexternal/unity~{}/lib".format(UNITY_VERSION),
-    # "-Iexternal/uthash~{}/lib".format(UTHASH_VERSION),
-    # "-Iexternal/liblogc~{}/lib".format(LIBLOGC_VERSION),
-
-    # "-Itest/unit",
-    # "-Itest/libmustachios",
-    # "-Itest/libmustachios/cjson",
-    # "-Ilib/libmustachios",
-    # "-Iexternal/libs7/lib/libmustachios",
 ]
 
 COPTS         = BASE_COPTS + INCLUDE_PATHS

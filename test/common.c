@@ -176,7 +176,7 @@ s7_scheme *initialize(char *test, int argc, char **argv)
 
     if (debug) print_debug_env();
 
-    s7_scheme *s7 = libs7_init();
+    s7_scheme *s7 = libs7_init(argv[0]);
 
     /* libmustachios7_s7_init(s7); */
     return s7;

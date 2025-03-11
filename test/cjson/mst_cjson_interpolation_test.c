@@ -44,10 +44,16 @@ void basic_interpolation(void) {
 
     // HTML escaping
     /* Basic interpolation should be HTML escaped. */
+    // FIXME: we disable HTML escaping by default
+    /* S7_RENDER_TEST(s7_f(s7), */
+    /*       "These characters should be HTML escaped: {{forbidden}}", */
+    /*       "{\"forbidden\": \"& \\\" < >\"}", */
+    /*       "These characters should be HTML escaped: &amp; &quot; &lt; &gt;"); */
+
     S7_RENDER_TEST(s7_f(s7),
-          "These characters should be HTML escaped: {{forbidden}}",
+          "These characters should not be HTML escaped: {{forbidden}}",
           "{\"forbidden\": \"& \\\" < >\"}",
-          "These characters should be HTML escaped: &amp; &quot; &lt; &gt;");
+          "These characters should not be HTML escaped: & \" < >");
 
     // Triple mustaches
     /* Triple mustaches should interpolate without HTML escaping. */
